@@ -1,2 +1,5 @@
 .DS_Store
 *.out
+week4/code/.idea
+week4/code/cmake-build-debug
+week4/code/build

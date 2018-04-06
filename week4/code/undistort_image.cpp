@@ -5,9 +5,11 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 
+#define Square(x) ((x)*(x))
+
 using namespace std;
 
-string image_file = "./test.png";   // 请确保路径正确
+  // 请确保路径正确
 
 int main(int argc, char **argv) {
 
@@ -16,8 +18,9 @@ int main(int argc, char **argv) {
     double k1 = -0.28340811, k2 = 0.07395907, p1 = 0.00019359, p2 = 1.76187114e-05;
     // 内参
     double fx = 458.654, fy = 457.296, cx = 367.215, cy = 248.375;
+    string image_file = "./test.png";
 
-    cv::Mat image = cv::imread(image_file,0);   // 图像是灰度图，CV_8UC1
+    cv::Mat image = cv::imread(image_file, CV_8UC1);   // 图像是灰度图，CV_8UC1
     int rows = image.rows, cols = image.cols;
     cv::Mat image_undistort = cv::Mat(rows, cols, CV_8UC1);   // 去畸变以后的图
 
@@ -28,7 +31,14 @@ int main(int argc, char **argv) {
             double u_distorted = 0, v_distorted = 0;
             // TODO 按照公式，计算点(u,v)对应到畸变图像中的坐标(u_distorted, v_distorted) (~6 lines)
             // start your code here
-            
+            // 将像素坐标转化为归一化坐标
+            double g_x = ((double)u - cx) / fx;
+            double g_y = ((double)v - cy) / fy;
+            double r_squre = Square(g_x) + Square(g_y);
+            double x_distorted = g_x * (1 + k1 * r_squre + k2 * Square(r_squre)) +2 * p1 * g_x * g_y + p2 * (r_squre + 2 * Square(g_x));
+            double y_distored = g_y * (1 + k1 * r_squre + k2 * Square(r_squre)) + p1 *(r_squre + 2 * Square(g_y)) + 2 * p2 * g_x * g_y;
+            u_distorted = fx * x_distorted + cx;
+            v_distorted = fy * y_distored + cy;
             // end your code here
 
             // 赋值 (最近邻插值)
@@ -40,6 +50,7 @@ int main(int argc, char **argv) {
         }
 
     // 画图去畸变后图像
+    cv::imshow("image undistorted", image_undistort);
     cv::imshow("image undistorted", image_undistort);
     cv::waitKey();
 
