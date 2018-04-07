@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     // 内参
     double fx = 718.856, fy = 718.856, cx = 607.1928, cy = 185.2157;
     // 间距
-    double d = 0.573;
+    double b = 0.573;
 
     // 读取图像
     cv::Mat left = cv::imread(left_file, 0);
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     cv::Mat disparity = cv::imread(disparity_file, 0); // disparty 为CV_8U,单位为像素
 
     // 生成点云
-    vector<Vector4d, Eigen::aligned_allocator<Vector4d>> pointcloud;
+    vector<Vector4d, Eigen::aligned_allocator<Vector4d> > pointcloud;
 
     // TODO 根据双目模型计算点云
     // 如果你的机器慢，请把后面的v++和u++改成v+=2, u+=2
@@ -43,6 +43,13 @@ int main(int argc, char **argv) {
 
             // start your code here (~6 lines)
             // 根据双目模型计算 point 的位置
+            unsigned short d = disparity.at<uchar>(v, u);
+            point[2] = fy * b / (double)d;
+            point[0] = point[2] * (u - cx) / fx ;
+            point[1] = point[2] * (v - cy) / fy ;
+            pointcloud.push_back(point);
+
+
             // end your code here
         }
 

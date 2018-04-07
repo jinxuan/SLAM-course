@@ -21,7 +21,20 @@ int main(int argc, char **argv) {
 
     /// implement pose reading code
     // start your code here (5~10 lines)
+    // read in the trajectory file, add convert it to poses
+    ifstream inFile;
+    inFile.open(trajectory_file);
+    string line;
+    while(inFile.good() && (getline(inFile, line))) {
+        istringstream iss(line);
+        double t, tx, ty, tz, qx, qy, qz, qw;
+        iss >> t >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
+        Eigen::Quaterniond q = Eigen::Quaterniond(qx, qy, qz, qw);
+        Eigen::Vector3d v = Eigen::Vector3d(tx, ty, tz);
+        Sophus::SE3 se3 = Sophus::SE3(q, v);
+        poses.push_back(se3);
 
+    }
     // end your code here
 
     // draw trajectory in pangolin
