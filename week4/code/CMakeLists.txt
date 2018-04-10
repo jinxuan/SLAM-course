@@ -19,3 +19,7 @@ target_link_libraries( undistort_image ${OpenCV_LIBS} )
 add_executable(disparity disparity.cpp)
 
 target_link_libraries(disparity ${OpenCV_LIBS} ${EIGEN3_LIBS} ${Pangolin_LIBRARIES})
+
+add_executable( gaussnewton gaussnewton.cpp )
+# 链接OpenCV库
+target_link_libraries( gaussnewton ${OpenCV_LIBS} ${EIGEN3_LIBS})
