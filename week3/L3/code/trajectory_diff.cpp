@@ -10,14 +10,35 @@
 using namespace std;
 
 // path to trajectory file
-string trajectory_file = "./trajectory.txt";
+string ground_truth_trajectory_file = "./groundtruth.txt";
+string estimate_trajectory_file = "./estimated.txt";
 
 // function for plotting trajectory, don't edit this code
 // start point is red and end point is blue
-void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>>);
+void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>>, vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>>);
+
+vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> generate_pose(string file_path);
 
 int main(int argc, char **argv) {
+    auto ground_truth_pose = generate_pose(ground_truth_trajectory_file);
+    auto estimate_pose = generate_pose(estimate_trajectory_file);
 
+    int n = estimate_pose.size();
+    double RMSE = 0.0;
+    for(int i = 0; i < n; i++) {
+        auto tgi = ground_truth_pose[i];
+        auto tei = estimate_pose[i];
+        typedef Eigen::Matrix<double, 6, 1> Vector6d;
+        Vector6d tmp = (tgi.inverse() * tei).log();
+        double ei = tmp.transpose() * tmp;
+        RMSE += ei;
+    }
+
+    cout << "RMSE:" << sqrt(RMSE / n) << endl;
+    DrawTrajectory(ground_truth_pose, estimate_pose);
+};
+
+vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> generate_pose(string trajectory_file) {
     vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> poses;
 
     /// implement pose reading code
@@ -36,16 +57,12 @@ int main(int argc, char **argv) {
         poses.push_back(se3);
 
     }
-    // end your code here
-
-    // draw trajectory in pangolin
-    DrawTrajectory(poses);
-    return 0;
-}
+    return poses;
+};
 
 /*******************************************************************************************/
-void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> poses) {
-    if (poses.empty()) {
+void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> poses1, vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> poses2) {
+    if (poses1.empty() || poses2.empty()) {
         cerr << "Trajectory is empty!" << endl;
         return;
     }
@@ -73,10 +90,13 @@ void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> p
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         glLineWidth(2);
-        for (size_t i = 0; i < poses.size() - 1; i++) {
-            glColor3f(1 - (float) i / poses.size(), 0.0f, (float) i / poses.size());
+        for (size_t i = 0; i < poses1.size() - 1; i++) {
+            glColor3f(1 - (float) i / poses1.size(), 0.0f, (float) i / poses1.size());
             glBegin(GL_LINES);
-            auto p1 = poses[i], p2 = poses[i + 1];
+            auto p1 = poses1[i], p2 = poses1[i + 1];
+            glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
+            glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
+            p1 = poses2[i], p2 = poses2[i + 1];
             glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
             glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
             glEnd();

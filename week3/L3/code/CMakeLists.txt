@@ -47,3 +47,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 ADD_EXECUTABLE(draw_trajectory draw_trajectory.cpp)
 target_link_libraries(draw_trajectory ${Pangolin_LIBRARIES} ${EIGEN3_LIBS} ${Sophus_LIBRARIES})
+
+ADD_EXECUTABLE(trajectory_diff trajectory_diff.cpp)
+target_link_libraries(trajectory_diff ${Pangolin_LIBRARIES} ${EIGEN3_LIBS} ${Sophus_LIBRARIES})
